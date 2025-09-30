@@ -115,12 +115,74 @@ void Afficher_animal(Animal animal)
     printf("|%-10.2f\n", animal.poids);
 }
 
-void Afficher_tous_les_animaux(Animal animal[])
+void Afficher_tous_les_animaux(Animal animal[], char message[])
 {
+
+    printf("%s", message);
+    printf("------------------------------------------------------\n");
     printf("%-5s|%-10s|%-10s|%-5s|%-10s|%-10s\n", "ID", "NOM", "ESPECE", "AGE", "HABITIT", "POIDS");
     printf("------------------------------------------------------\n");
     for (int i = 0; i < count_animaux_id; i++)
         Afficher_animal(animal[i]);
+}
+
+void trie_animaux_par_nom(Animal animal[])
+{
+
+    int changment = 1;
+
+    while (changment)
+    {
+        changment = 0;
+        for (int i = 0; i < count_animaux_id - 1; i++)
+        {
+            if (strcmp(animal[i].nom, animal[i + 1].nom) > 0)
+            {
+                Animal tmp = animal[i];
+                animal[i] = animal[i + 1];
+                animal[i + 1] = tmp;
+                changment = 1;
+            }
+        }
+    }
+}
+
+void trie_animaux_par_age(Animal animal[])
+{
+
+    int changment = 1;
+
+    while (changment)
+    {
+        changment = 0;
+        for (int i = 0; i < count_animaux_id - 1; i++)
+        {
+            if (animal[i].age > animal[i + 1].age)
+            {
+                Animal tmp = animal[i];
+                animal[i] = animal[i + 1];
+                animal[i + 1] = tmp;
+                changment = 1;
+            }
+        }
+    }
+}
+
+void Afficher_les_animaux_d_un_habitat_specefique(Animal animal[], char habitat[])
+{
+    int count = 0;
+    printf("------------------------------------------------------\n");
+    printf("%-5s|%-10s|%-10s|%-5s|%-10s|%-10s\n", "ID", "NOM", "ESPECE", "AGE", "HABITIT", "POIDS");
+    printf("------------------------------------------------------\n");
+
+    for (int i = 0; i < count_animaux_id; i++)
+        if (strcmp(animal[i].habitat, habitat) == 0)
+        {
+            Afficher_animal(animal[i]);
+            count++;
+        }
+    if (count == 0)
+        printf("\taucan animal d'un habitat %s  !\n", habitat);
 }
 
 void option_affichage(Animal animal[])
@@ -143,18 +205,32 @@ void option_affichage(Animal animal[])
         {
         case 1:
             clear();
-            Afficher_tous_les_animaux(animal);
-             pause();
+            Afficher_tous_les_animaux(animal, "");
+            pause();
             break;
+
         case 2:
             clear();
-             pause();
+            trie_animaux_par_nom(animal);
+            Afficher_tous_les_animaux(animal, "----------les animaux trier par leurs noms---------\n");
+            pause();
+            break;
+        case 3:
+            clear();
+            trie_animaux_par_age(animal);
+            Afficher_tous_les_animaux(animal, "----------les animaux trier par leurs ages---------\n");
+            pause();
+            break;
+        case 4:
+            clear();
+            Afficher_les_animaux_d_un_habitat_specefique(animal, saisir_chaine_de_caractere("entrer habitat", 20));
+            pause();
             break;
 
         default:
             break;
         }
-           
+
         clear();
     } while (choix != 0);
 }
@@ -186,16 +262,32 @@ void menu_affichage_prancipale(Animal animal[])
         case 2:
             clear();
             option_affichage(animal);
-             pause();
+            pause();
             break;
 
         default:
             break;
         }
-    
 
         clear();
     } while (choix != 0);
+}
+
+void Modifier_un_animal(Animal animal[])
+{
+    int id;
+    printf("entre id de animal");
+    scanf("%d", &id);
+    if (id >= 0 && id < count_animaux_id)
+    {
+        printf("\tvoici information d'animal id:%d\n", id);
+        printf("------------------------------------------------------\n");
+        printf("%-5s|%-10s|%-10s|%-5s|%-10s|%-10s\n", "ID", "NOM", "ESPECE", "AGE", "HABITIT", "POIDS");
+        printf("------------------------------------------------------\n");
+        Afficher_animal(animal[id]);
+    }
+    else
+        printf("\tl'animal id:%d n'existe pas !\n", id);
 }
 
 int main()
@@ -203,7 +295,6 @@ int main()
     // menu_affichage_prancipale();
     Animal a[Nomnre_max_animaux];
     fichier_to_tableau_animaux(a);
-
-    menu_affichage_prancipale(a);
-    // Afficher_tous_les_animaux(a);
+    Modifier_un_animal(a);
+    // menu_affichage_prancipale(a);
 }
