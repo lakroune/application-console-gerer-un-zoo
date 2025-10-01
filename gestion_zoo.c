@@ -1,11 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #define Nomnre_max_animaux 100
 
 int COUNT_ANIMAL = 0;
-int ID_ANIMAL_AUTO_INCREMENT = 0;
+int ID_ANIMAL_AUTO_INCREMENT = 1;
 
 typedef struct
 {
@@ -167,7 +166,7 @@ void options_ajouter_un_animal(Animal animal[])
         printf("2. Ajouter plusieurs animaux\n");
         printf("0. Retourner au menu principal\n");
 
-        choix = saisir_entier_positif("", " erreur de saisir [0-2]", 3);
+        choix = saisir_entier_positif("->", "->erreur de saisir [0-2]\n->", 2);
 
         switch (choix)
         {
@@ -364,7 +363,7 @@ void options_affichage(Animal animal[])
         printf("3. Trier par age d'un animal\n");
         printf("4. Afficher les animaux d'un habitat specefique\n");
         printf("0. retour le menu Principale\n");
-        choix = saisir_entier_positif("", "\terreur de saisir!\n", 5);
+        choix = saisir_entier_positif("->", "->erreur de saisir!\n->", 4);
 
         switch (choix)
         {
@@ -425,7 +424,7 @@ void options_modifier_un_animal(Animal animal[], int id_modification)
         printf("1. Modifier l'habitat \n");
         printf("2. Modifier l'age\n");
         printf("0. Retourner au menu principal\n");
-        choix = saisir_entier_positif("", "entree invalid [0-2] :", 3);
+        choix = saisir_entier_positif("", "entree invalid [0-2] :", 2);
         switch (choix)
         {
         case 1:
@@ -464,7 +463,10 @@ void Modifier_un_animal(Animal animal[], int select_id_pour_modifier)
         options_modifier_un_animal(animal, id_existe(animal, select_id_pour_modifier));
     }
     else
+    {
         printf("\tl'animal id:%d n'existe pas !\n", select_id_pour_modifier);
+        pause();
+    }
 }
 
 void Supprimer_un_animal(Animal animal[], int id_animal_supprimer)
@@ -482,7 +484,7 @@ void Supprimer_un_animal(Animal animal[], int id_animal_supprimer)
 void options_de_supprimer(Animal animal[])
 {
     char choix;
-    int id_select_pour_supprimer = saisir_entier_positif("ID :", "entree invalid [0-9]: ", 10000000);
+    int id_select_pour_supprimer = saisir_entier_positif("ID :", "ID n'existe pas [0>?]: ", ID_ANIMAL_AUTO_INCREMENT);
     if (id_existe(animal, id_select_pour_supprimer) != -1)
     {
         printf("\tvoici information d'animal id:%d\n", id_select_pour_supprimer);
@@ -498,7 +500,7 @@ void options_de_supprimer(Animal animal[])
             case 'y':
                 clear();
                 Supprimer_un_animal(animal, id_select_pour_supprimer);
-                printf("l'animal de ID:%d  suprimer !\n", id_select_pour_supprimer);
+                printf("l'animal de ID:%d ete supprime !\n", id_select_pour_supprimer);
                 pause();
                 choix = 'n';
                 break;
@@ -513,8 +515,10 @@ void options_de_supprimer(Animal animal[])
             clear();
         } while (choix != 'n');
     }
-    else
-        printf("\taucan animal d ID :%d   !\n", id_select_pour_supprimer);
+    else        {
+            printf("\tl'animal id:%d n'existe pas !\n", id_select_pour_supprimer);
+            pause();    
+    }
 }
 
 void Rechercher_par_id(Animal animal[])
@@ -575,7 +579,7 @@ void options_Rechercher_un_animal(Animal animal[])
         printf("2. Rechercher par Nom.\n");
         printf("3. Rechercher par Espece\n");
         printf("0. Retourner au menu principal\n");
-        choix = saisir_entier_positif("", "erreur de saisie!\n", 4);
+        choix = saisir_entier_positif("", "erreur de saisie![0-3]\n", 3);
 
         switch (choix)
         {
@@ -695,7 +699,7 @@ void menu_affichage_principale(Animal animal[])
         printf("5. Rechercher un animal\n");
         printf("6. Statistiques\n");
         printf("0. Quitter\n");
-        choix = saisir_entier_positif("", "\nerreur de saisir\n", 6);
+        choix = saisir_entier_positif("", "\nerreur de saisir[0-6]\n", 6);
         getchar();
         switch (choix)
         {
@@ -709,8 +713,8 @@ void menu_affichage_principale(Animal animal[])
             break;
         case 3:
             clear();
-
             Modifier_un_animal(animal, saisir_entier_positif("ID :", "entree invalid [0>?]: ", ID_ANIMAL_AUTO_INCREMENT)); // 121212
+
             break;
         case 4:
             clear();
