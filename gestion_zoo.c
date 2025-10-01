@@ -322,7 +322,7 @@ void Modifier_un_animal(Animal animal[])
         printf("\tvoici information d'animal id:%d\n", select_id_pour_modifier);
         header_de_tableau();
         Afficher_animal(animal[select_id_pour_modifier]);
-        printf("------------------------------------------------------\n");
+        footer_de_tableau();
         options_de_modifier(animal, select_id_pour_modifier);
     }
     else
@@ -461,6 +461,75 @@ void options_Rechercher_un_animal(Animal animal[])
         clear();
     } while (choix != 0);
 }
+float trouver_age_moyenne(Animal animal[])
+{
+    int sum = 0;
+    for (int i = 0; i < count_animaux_id; i++)
+        sum += animal[i].age;
+    return (float)sum / (float)(count_animaux_id - 1);
+}
+Animal Plus_vieux_animal(Animal animal[])
+{
+    Animal animal_vieux = animal[0];
+
+    for (int i = 1; i < count_animaux_id; i++)
+        if (animal[i].age > animal_vieux.age)
+            animal_vieux = animal[i];
+    return animal_vieux;
+}
+
+Animal Plus_jeune_animal(Animal animal[])
+{
+    Animal animal_jeune = animal[0];
+
+    for (int i = 1; i < count_animaux_id; i++)
+        if (animal[i].age < animal_jeune.age)
+            animal_jeune = animal[i];
+    return animal_jeune;
+}
+
+void especes_les_plus_représentées(Animal animal[])
+{
+    int count = 0, max = 0;
+
+    char espece[20];
+    for (int i = 0; i < count_animaux_id; i++)
+    {
+        for (int j = 0; j < count_animaux_id; j++)
+            if (strcmp(animal[i].espece, animal[j].espece) == 0)
+                count++;
+        if (max < count)
+        {
+            max = count;
+            strcpy(espece, animal[i].espece);
+        }
+
+        count = 0;
+    }
+
+    printf(" %-10s %d fois\n", espece, max);
+}
+void Statistiques(Animal animal[])
+{
+    printf("================ Gestion du Zoo ===============\n");
+    printf("=================Statistiques==================\n");
+    footer_de_tableau();
+
+    printf("Nombre total d'animaux dans le zoo est :%d\n", count_animaux_id - 1);
+    footer_de_tableau();
+    printf("Age moyen des animaux. ;%-5.2f\n", trouver_age_moyenne(animal));
+    footer_de_tableau();
+    printf("============Plus vieux animal==============\n");
+    header_de_tableau();
+    Afficher_animal(Plus_vieux_animal(animal));
+    footer_de_tableau();
+    printf("============Plus jeune  animal=============\n");
+    header_de_tableau();
+    Afficher_animal(Plus_jeune_animal(animal));
+    footer_de_tableau();
+    printf("========== espece le plus représentee=========\n");
+    especes_les_plus_représentées(animal);
+}
 void menu_affichage_prancipale(Animal animal[])
 {
 
@@ -505,6 +574,11 @@ void menu_affichage_prancipale(Animal animal[])
             options_Rechercher_un_animal(animal);
             pause();
             break;
+        case 6:
+            clear();
+            Statistiques(animal);
+            pause();
+            break;
 
         case 0:
             break;
@@ -522,8 +596,8 @@ void menu_affichage_prancipale(Animal animal[])
 
 int main()
 {
-    // menu_affichage_prancipale();
     Animal a[Nomnre_max_animaux];
     fichier_to_tableau_animaux(a);
+
     menu_affichage_prancipale(a);
 }
