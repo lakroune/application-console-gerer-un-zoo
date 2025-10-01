@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #define Nomnre_max_animaux 100
 
 int count_animaux_id = 0;
@@ -28,36 +29,56 @@ void pause()
 
 void header_de_tableau()
 {
-    printf("------------------------------------------------------\n");
-    printf("%-5s|%-10s|%-10s|%-5s|%-10s|%-10s\n", "ID", "NOM", "ESPECE", "AGE", "HABITIT", "POIDS");
-    printf("------------------------------------------------------\n");
+    printf("|======================================================================|\n");
+    printf("|%-5s|%-15s|%-15s|%-5s|%-15s|%-10s|\n", "ID", "NOM", "ESPECE", "AGE", "HABITAT", "POIDS");
+    printf("|======================================================================|\n");
 }
 void footer_de_tableau()
 {
-    printf("------------------------------------------------------\n");
+    printf("|______________________________________________________________________|\n");
 }
 char *saisir_chaine_de_caractere(char text[], int size)
 {
     char *input = malloc(size * sizeof(char));
-    printf("%s", text);
-    getchar();
-    fgets(input, size, stdin);
-    input[strlen(input) - 1] = '\0';
+    do
+    {
+        printf("%s", text);
+        getchar();
+        fgets(input, size, stdin);
+        input[strlen(input) - 1] = '\0';
+    } while (strlen(input) == 0);
     return input;
 }
-int saisir_entier(char text[], char message_errer[])
-{
-    int entier;
-    printf("%s", text);
 
-    while (scanf("%d", &entier) != 1)
+int saisir_entier_positif(char text[], char message_errer[], int max)
+{
+
+    int entier, i;
+    printf("%s", text);
+    while (scanf("%d", &entier) != 1 || entier < 0 || entier > max)
     {
         clear();
         printf("%s", message_errer);
-        while (getchar() != '\n')
+        while ((i = getchar()) != '\n' && i != EOF)
             ;
     }
     return entier;
+}
+
+float saisir_reel(char text[], char message_errer[])
+{
+    float reel;
+    int i;
+    printf("%s", text);
+
+    while (scanf("%f", &reel) != 1 || reel < 0)
+    {
+        clear();
+        printf("%s", message_errer);
+        while ((i = getchar()) != '\n' && i != EOF)
+            ;
+    }
+    return reel;
 }
 
 char saisir_caracter(char text[])
@@ -79,24 +100,91 @@ Animal cree_un_animal()
     strcpy(animal.nom, saisir_chaine_de_caractere("Nom Animal :", 20));
     strcpy(animal.espece, saisir_chaine_de_caractere("Espece :", 20));
     strcpy(animal.habitat, saisir_chaine_de_caractere("Habitat :", 20));
-
-    printf("Poids :");
-    scanf("%f", &animal.poids);
-    printf("Age :");
-    scanf("%d", &animal.age);
+    animal.poids = saisir_reel("Poids :", "erreur de saisir [0-9]: ");
+    animal.age = saisir_entier_positif("Age :", "erreur de saisir [0-9]: ", 100);
     animal.id = count_animaux_id++;
     return animal;
 }
 
-void Ajouter_un_animal(Animal animal[])
+void Afficher_animal(Animal animal)
 {
-    animal[count_animaux_id] = cree_un_animal();
-    clear();
-    printf("\nl'animal ajoute avec succes !\n ");
-    pause();
-    clear();
+    printf("|%-5d", animal.id);
+    printf("|%-15s", animal.nom);
+    printf("|%-15s", animal.espece);
+    printf("|%-5d", animal.age);
+    printf("|%-15s", animal.habitat);
+    printf("|%-10.2f|\n", animal.poids);
 }
 
+void Ajouter_un_animal(Animal animal[])
+{
+    printf("\n========= <Animal ID: %d> ===========\n", count_animaux_id);
+    animal[count_animaux_id] = cree_un_animal();
+    clear();
+    printf("\nl'animal ajoute avec succes !\n");
+    header_de_tableau();
+    Afficher_animal(animal[count_animaux_id - 1]);
+    footer_de_tableau();
+}
+
+void Ajouter_plusieur_animaux(Animal animal[])
+{
+    char choix = 'y';
+    do
+    {
+        switch (choix)
+        {
+        case 'y':
+            Ajouter_un_animal(animal);
+            break;
+        case 'n':
+            break;
+
+        default:
+            printf("choix invalide \n");
+            break;
+        }
+
+        choix = saisir_caracter(" vieullez vous ajouter un autre animal [y/n]: ");
+        clear();
+    } while (choix != 'n');
+}
+void options_ajouter_un_animal(Animal animal[])
+{
+    int choix;
+    clear();
+    do
+    {
+        printf("============  Gestion du Zoo ========\n");
+        printf("=============Options D'Ajout=========\n");
+        printf("1. Ajouter un animal\n");
+        printf("2. Ajouter plusieurs animaux\n");
+        printf("0. Retourner au menu principal\n");
+
+        choix = saisir_entier_positif("", " erreur de saisir [0-2]", 3);
+
+        switch (choix)
+        {
+        case 1:
+            clear();
+            Ajouter_un_animal(animal);
+            pause();
+            choix=0;
+            break;
+        case 2:
+            clear();
+            Ajouter_plusieur_animaux(animal);
+            choix=0;
+            break;
+        case 0:
+            break;
+
+        default:
+            break;
+        }
+        clear();
+    } while (choix != 0);
+}
 Animal fichier_to_tableau_animaux(Animal animal[])
 {
     FILE *fichier;
@@ -141,16 +229,6 @@ Animal fichier_to_tableau_animaux(Animal animal[])
     }
 }
 
-void Afficher_animal(Animal animal)
-{
-    printf("%-5d", animal.id);
-    printf("|%-10s", animal.nom);
-    printf("|%-10s", animal.espece);
-    printf("|%-5d", animal.age);
-    printf("|%-10s", animal.habitat);
-    printf("|%-10.2f\n", animal.poids);
-}
-
 void Afficher_tous_les_animaux(Animal animal[], char message[])
 {
 
@@ -158,6 +236,24 @@ void Afficher_tous_les_animaux(Animal animal[], char message[])
     header_de_tableau();
     for (int i = 0; i < count_animaux_id; i++)
         Afficher_animal(animal[i]);
+}
+void trie_animaux_par_id(Animal animal[])
+{
+    int changment = 1;
+    while (changment)
+    {
+        changment = 0;
+        for (int i = 0; i < count_animaux_id - 1; i++)
+        {
+            if (animal[i].id > animal[i + 1].id)
+            {
+                Animal tmp = animal[i];
+                animal[i] = animal[i + 1];
+                animal[i + 1] = tmp;
+                changment = 1;
+            }
+        }
+    }
 }
 
 void trie_animaux_par_nom(Animal animal[])
@@ -200,21 +296,38 @@ void trie_animaux_par_age(Animal animal[])
     }
 }
 
-void Afficher_les_animaux_d_un_habitat_specefique(Animal animal[], char habitat[])
+int habitat_existe(Animal animal[], char habitat[])
 {
-    int count = 0;
-    header_de_tableau();
     for (int i = 0; i < count_animaux_id; i++)
         if (strcmp(animal[i].habitat, habitat) == 0)
-        {
-            Afficher_animal(animal[i]);
-            count++;
-        }
-    if (count == 0)
-        printf("\taucan animal d'un habitat %s  !\n", habitat);
+            return 1;
+    return 0;
+}
+int id_existe(Animal animal[], int id)
+{
+    for (int i = 0; i < count_animaux_id; i++)
+        if (animal[i].id == id)
+            return i;
+    return -1;
+}
+void Afficher_les_animaux_d_un_habitat_specefique(Animal animal[], char habitat[])
+{
+    if (habitat_existe(animal, habitat))
+    {
+        printf("-----------------------les animaux d'habitat %s------------------------\n", habitat);
+        header_de_tableau();
+        for (int i = 0; i < count_animaux_id; i++)
+            if (strcmp(animal[i].habitat, habitat) == 0)
+                Afficher_animal(animal[i]);
+        footer_de_tableau();
+    }
+    else
+    {
+        printf("\nAucun animal a cet habitat : %s  !\n", habitat);
+    }
 }
 
-void option_affichage(Animal animal[])
+void options_affichage(Animal animal[])
 {
 
     int choix;
@@ -228,13 +341,14 @@ void option_affichage(Animal animal[])
         printf("3. Trier par age d'un animal\n");
         printf("4. Afficher les animaux d'un habitat specefique\n");
         printf("0. retour le menu Principale\n");
-        choix = saisir_entier("", "\terreur de saisir!\n");
+        choix = saisir_entier_positif("", "\terreur de saisir!\n", 5);
 
         switch (choix)
         {
         case 1:
             clear();
-            Afficher_tous_les_animaux(animal, "");
+            trie_animaux_par_id(animal);
+            Afficher_tous_les_animaux(animal, " ---------la liste des animaux complet---------\n");
             pause();
             break;
 
@@ -252,15 +366,13 @@ void option_affichage(Animal animal[])
             break;
         case 4:
             clear();
-            Afficher_les_animaux_d_un_habitat_specefique(animal, saisir_chaine_de_caractere("entrer habitat", 20));
+            Afficher_les_animaux_d_un_habitat_specefique(animal, saisir_chaine_de_caractere("Habitat: ", 20));
             pause();
             break;
         case 0:
             break;
         default:
-            clear();
             printf("choix invalide !\n");
-            pause();
             break;
         }
 
@@ -270,25 +382,27 @@ void option_affichage(Animal animal[])
 
 void Modifier_habitat_animal(Animal animal[], int id_modification)
 {
-    strcpy(animal[id_modification].habitat, saisir_chaine_de_caractere("nouvel habitat : ", 20));
+    strcpy(animal[id_modification].habitat, saisir_chaine_de_caractere("Nouvel Habitat :", 20));
+    printf("l'habitat modifier avec succes !\n");
 }
 
 void Modifier_age_animal(Animal animal[], int id_modification)
 {
-    animal[id_modification].age = saisir_entier("nouvel age :", " entree invalid[0-9] :");
+    animal[id_modification].age = saisir_entier_positif("Nouvel age :", " erreur de saisie !\n Age [0-100] :", 100);
+    printf("l'age modifier avec succes !\n");
 }
 
-void options_de_modifier(Animal animal[], int id_modification)
+void options_modifier_un_animal(Animal animal[], int id_modification)
 {
     int choix;
     do
     {
-        printf("========= Gestion du Zoo ========\n");
-        printf("=========Menu Modification=========\n");
+        printf("==================Gestion du Zoo ===============\n");
+        printf("=========== Les options de Modification ===========\n");
         printf("1. Modifier l'habitat \n");
         printf("2. Modifier l'age\n");
-        printf("0. Quitter\n");
-        choix = saisir_entier("", "entree invalid [0-2] :");
+        printf("0. Retourner au menu principal\n");
+        choix = saisir_entier_positif("", "entree invalid [0-2] :", 3);
         switch (choix)
         {
         case 1:
@@ -303,7 +417,8 @@ void options_de_modifier(Animal animal[], int id_modification)
             pause();
             choix = 0;
             break;
-
+        case 0:
+            break;
         default:
             clear();
             printf("choix invalide !\n");
@@ -314,39 +429,42 @@ void options_de_modifier(Animal animal[], int id_modification)
     } while (choix != 0);
 }
 
-void Modifier_un_animal(Animal animal[])
+void Modifier_un_animal(Animal animal[], int select_id_pour_modifier)
 {
-    int select_id_pour_modifier = saisir_entier("entrer ID: ", "entree invalide,ID [0-9] :");
-    if (select_id_pour_modifier >= 0 && select_id_pour_modifier < count_animaux_id)
+
+    if (id_existe(animal, select_id_pour_modifier) != -1)
     {
         printf("\tvoici information d'animal id:%d\n", select_id_pour_modifier);
         header_de_tableau();
-        Afficher_animal(animal[select_id_pour_modifier]);
+        Afficher_animal(animal[id_existe(animal, select_id_pour_modifier)]);
         footer_de_tableau();
-        options_de_modifier(animal, select_id_pour_modifier);
+        options_modifier_un_animal(animal, id_existe(animal, select_id_pour_modifier));
     }
     else
         printf("\tl'animal id:%d n'existe pas !\n", select_id_pour_modifier);
 }
+
 void Supprimer_un_animal(Animal animal[], int id_animal_supprimer)
 {
 
-    for (int i = id_animal_supprimer; i < count_animaux_id - 1; i++)
-    {
-        animal[i] = animal[i + 1];
-        animal[i].id--;
-    }
-    count_animaux_id--;
+    for (int i = 0; i < count_animaux_id - 1; i++)
+        if (id_animal_supprimer == animal[i].id)
+        {
+            for (int j = i; j < count_animaux_id - 1; j++)
+                animal[j] = animal[j + 1];
+            count_animaux_id--;
+        }
 }
+
 void options_de_supprimer(Animal animal[])
 {
     char choix;
-    int id_select_pour_supprimer = saisir_entier("ID :", "entree invalid [0-9]: ");
-    if (id_select_pour_supprimer >= 0 && id_select_pour_supprimer < count_animaux_id)
+    int id_select_pour_supprimer = saisir_entier_positif("ID :", "entree invalid [0-9]: ", 10000000);
+    if (id_existe(animal, id_select_pour_supprimer) != -1)
     {
         printf("\tvoici information d'animal id:%d\n", id_select_pour_supprimer);
         header_de_tableau();
-        Afficher_animal(animal[id_select_pour_supprimer]);
+        Afficher_animal(animal[id_existe(animal, id_select_pour_supprimer)]);
         footer_de_tableau();
 
         do
@@ -378,15 +496,14 @@ void options_de_supprimer(Animal animal[])
 
 void Rechercher_par_id(Animal animal[])
 {
-    int id = saisir_entier("ID : ", "erreur de saisir [0-9] :");
+    int id = saisir_entier_positif("ID : ", "Ce ID n'existe pas !\n", count_animaux_id);
     header_de_tableau();
     for (int i = 0; i < count_animaux_id; i++)
         if (animal[i].id == id)
         {
             Afficher_animal(animal[i]);
-            return;
+            footer_de_tableau();
         }
-    printf("ID:%d n'existe pas !\n", id);
 }
 void Rechercher_par_nom(Animal animal[])
 {
@@ -397,10 +514,11 @@ void Rechercher_par_nom(Animal animal[])
         if (strcmp(animal[i].nom, nom) == 0)
         {
             Afficher_animal(animal[i]);
+            footer_de_tableau();
             count++;
         }
     if (count == 0)
-        printf("\tNom:%s n'existe pas !\n", nom);
+        printf("\tNom:%s de l'animal n'existe pas !\n", nom);
 }
 void Rechercher_par_espece(Animal animal[])
 {
@@ -411,10 +529,11 @@ void Rechercher_par_espece(Animal animal[])
         if (strcmp(animal[i].espece, espece) == 0)
         {
             Afficher_animal(animal[i]);
+            footer_de_tableau();
             count++;
         }
     if (count == 0)
-        printf("\tEspece:%s n'existe pas !\n", espece);
+        printf("\tEspece:%s de l'animal n'existe pas !\n", espece);
 }
 void options_Rechercher_un_animal(Animal animal[])
 {
@@ -422,13 +541,13 @@ void options_Rechercher_un_animal(Animal animal[])
 
     do
     {
-        printf("========= Gestion du Zoo ========\n");
-        printf("=========Option Recherche=========\n");
-        printf("1. Rechercher par id. \n");
-        printf("2. Rechercher par nom.\n");
-        printf("3. Rechercher par espèce\n");
-        printf("0. retour le menu Principale\n");
-        choix = saisir_entier("", "erreur de saisir!\n");
+        printf("============ Gestion du Zoo ============\n");
+        printf("============ Options de Recherche=========\n");
+        printf("1. Rechercher par ID. \n");
+        printf("2. Rechercher par Nom.\n");
+        printf("3. Rechercher par Espece\n");
+        printf("0. Retourner au menu principal\n");
+        choix = saisir_entier_positif("", "erreur de saisie!\n", 4);
 
         switch (choix)
         {
@@ -488,11 +607,11 @@ Animal Plus_jeune_animal(Animal animal[])
     return animal_jeune;
 }
 
-void especes_les_plus_représentées(Animal animal[])
+void especes_les_plus_reprsentees(Animal animal[])
 {
     int count = 0, max = 0;
 
-    char espece[20];
+    char espece_reprsentee[20];
     for (int i = 0; i < count_animaux_id; i++)
     {
         for (int j = 0; j < count_animaux_id; j++)
@@ -501,36 +620,38 @@ void especes_les_plus_représentées(Animal animal[])
         if (max < count)
         {
             max = count;
-            strcpy(espece, animal[i].espece);
+            strcpy(espece_reprsentee, animal[i].espece);
         }
-
         count = 0;
     }
-
-    printf(" %-10s %d fois\n", espece, max);
+    printf("|======================================================================|\n");
+    printf("|%-20s              %-3dfois                             |\n", espece_reprsentee, max);
+    printf("|======================================================================|\n");
 }
 void Statistiques(Animal animal[])
 {
-    printf("================ Gestion du Zoo ===============\n");
-    printf("=================Statistiques==================\n");
-    footer_de_tableau();
+    printf("________________________________________________________________________\n");
 
-    printf("Nombre total d'animaux dans le zoo est :%d\n", count_animaux_id - 1);
-    footer_de_tableau();
-    printf("Age moyen des animaux. ;%-5.2f\n", trouver_age_moyenne(animal));
-    footer_de_tableau();
-    printf("============Plus vieux animal==============\n");
+    printf("|========================= Gestion du Zoo =============================|\n");
+    printf("|========================== Statistiques ==============================|\n");
+    printf("|======================================================================|\n");
+    printf("|======================================================================|\n");
+    printf("|Total animaux               %-10d                                |\n", count_animaux_id - 1);
+    printf("|======================================================================|\n");
+    printf("|Moyenne age                 %-10.2f ans                            |\n", trouver_age_moyenne(animal));
+    printf("|======================================================================|\n");
+    printf("|===========================Animal Plus Vieux==========================|\n");
     header_de_tableau();
     Afficher_animal(Plus_vieux_animal(animal));
-    footer_de_tableau();
-    printf("============Plus jeune  animal=============\n");
+    printf("|======================================================================|\n");
+    printf("|=========================Animal Plus Jeune============================|\n");
     header_de_tableau();
     Afficher_animal(Plus_jeune_animal(animal));
-    footer_de_tableau();
-    printf("========== espece le plus représentee=========\n");
-    especes_les_plus_représentées(animal);
+    printf("|======================================================================|\n");
+    printf("|=================especes les plus representees========================|\n");
+    especes_les_plus_reprsentees(animal);
 }
-void menu_affichage_prancipale(Animal animal[])
+void menu_affichage_principale(Animal animal[])
 {
 
     int choix;
@@ -538,7 +659,7 @@ void menu_affichage_prancipale(Animal animal[])
     do
     {
         printf("========= Gestion du Zoo ========\n");
-        printf("=========Menu Principale=========\n");
+        printf("=========Menu Principal=========\n");
         printf("1. Ajouter un animal\n");
         printf("2. Afficher les animaux\n");
         printf("3. Modifier un animal\n");
@@ -546,33 +667,29 @@ void menu_affichage_prancipale(Animal animal[])
         printf("5. Rechercher un animal\n");
         printf("6. Statistiques\n");
         printf("0. Quitter\n");
-        choix = saisir_entier("", "\nerreur de saisir\n");
+        choix = saisir_entier_positif("", "\nerreur de saisir\n", 6);
 
         switch (choix)
         {
         case 1:
             clear();
-            Ajouter_un_animal(animal);
+            options_ajouter_un_animal(animal);
             break;
         case 2:
             clear();
-            option_affichage(animal);
-            pause();
+            options_affichage(animal);
             break;
         case 3:
             clear();
-            Modifier_un_animal(animal);
-            pause();
+            Modifier_un_animal(animal, saisir_entier_positif("ID :", "entree invalid [0-100]: ", 100000)); // 121212
             break;
         case 4:
             clear();
             options_de_supprimer(animal);
-            pause();
             break;
         case 5:
             clear();
             options_Rechercher_un_animal(animal);
-            pause();
             break;
         case 6:
             clear();
@@ -599,5 +716,6 @@ int main()
     Animal a[Nomnre_max_animaux];
     fichier_to_tableau_animaux(a);
 
-    menu_affichage_prancipale(a);
+    menu_affichage_principale(a);
+    return 0;
 }
