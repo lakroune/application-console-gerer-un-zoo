@@ -32,6 +32,10 @@ void header_de_tableau()
     printf("%-5s|%-10s|%-10s|%-5s|%-10s|%-10s\n", "ID", "NOM", "ESPECE", "AGE", "HABITIT", "POIDS");
     printf("------------------------------------------------------\n");
 }
+void footer_de_tableau()
+{
+    printf("------------------------------------------------------\n");
+}
 char *saisir_chaine_de_caractere(char text[], int size)
 {
     char *input = malloc(size * sizeof(char));
@@ -127,14 +131,7 @@ Animal fichier_to_tableau_animaux(Animal animal[])
             case 5:
                 animal[count_animaux_id].poids = atof(info_animal);
                 break;
-
-            case 0:
-                break;
-
             default:
-                clear();
-                printf("choix invalide !\n");
-                pause();
                 break;
             }
             mon_posion_dans_linge++;
@@ -271,50 +268,6 @@ void option_affichage(Animal animal[])
     } while (choix != 0);
 }
 
-void menu_affichage_prancipale(Animal animal[])
-{
-
-    int choix;
-
-    do
-    {
-        printf("========= Gestion du Zoo ========\n");
-        printf("=========Menu Principale=========\n");
-        printf("1. Ajouter un animal\n");
-        printf("2. Afficher les animaux\n");
-        printf("3. Modifier un animal\n");
-        printf("4. Supprimer un animal\n");
-        printf("5. Rechercher un animal\n");
-        printf("6. Statistiques\n");
-        printf("0. Quitter\n");
-        choix = saisir_entier("", "\nerreur de saisir\n");
-
-        switch (choix)
-        {
-        case 1:
-            clear();
-            Ajouter_un_animal(animal);
-            break;
-        case 2:
-            clear();
-            option_affichage(animal);
-            pause();
-            break;
-
-        case 0:
-            break;
-
-        default:
-            clear();
-            printf("choix invalide !\n");
-            pause();
-            break;
-        }
-
-        clear();
-    } while (choix != 0);
-}
-
 void Modifier_habitat_animal(Animal animal[], int id_modification)
 {
     strcpy(animal[id_modification].habitat, saisir_chaine_de_caractere("nouvel habitat : ", 20));
@@ -331,7 +284,7 @@ void options_de_modifier(Animal animal[], int id_modification)
     do
     {
         printf("========= Gestion du Zoo ========\n");
-        printf("=========Menu Principale=========\n");
+        printf("=========Menu Modification=========\n");
         printf("1. Modifier l'habitat \n");
         printf("2. Modifier l'age\n");
         printf("0. Quitter\n");
@@ -379,7 +332,10 @@ void Supprimer_un_animal(Animal animal[], int id_animal_supprimer)
 {
 
     for (int i = id_animal_supprimer; i < count_animaux_id - 1; i++)
+    {
         animal[i] = animal[i + 1];
+        animal[i].id--;
+    }
     count_animaux_id--;
 }
 void options_de_supprimer(Animal animal[])
@@ -391,7 +347,7 @@ void options_de_supprimer(Animal animal[])
         printf("\tvoici information d'animal id:%d\n", id_select_pour_supprimer);
         header_de_tableau();
         Afficher_animal(animal[id_select_pour_supprimer]);
-        printf("------------------------------------------------------\n");
+        footer_de_tableau();
 
         do
         {
@@ -460,8 +416,7 @@ void Rechercher_par_espece(Animal animal[])
     if (count == 0)
         printf("\tEspece:%s n'existe pas !\n", espece);
 }
-
-void Options_Rechercher_un_animal(Animal animal[])
+void options_Rechercher_un_animal(Animal animal[])
 {
     int choix;
 
@@ -506,12 +461,69 @@ void Options_Rechercher_un_animal(Animal animal[])
         clear();
     } while (choix != 0);
 }
+void menu_affichage_prancipale(Animal animal[])
+{
+
+    int choix;
+
+    do
+    {
+        printf("========= Gestion du Zoo ========\n");
+        printf("=========Menu Principale=========\n");
+        printf("1. Ajouter un animal\n");
+        printf("2. Afficher les animaux\n");
+        printf("3. Modifier un animal\n");
+        printf("4. Supprimer un animal\n");
+        printf("5. Rechercher un animal\n");
+        printf("6. Statistiques\n");
+        printf("0. Quitter\n");
+        choix = saisir_entier("", "\nerreur de saisir\n");
+
+        switch (choix)
+        {
+        case 1:
+            clear();
+            Ajouter_un_animal(animal);
+            break;
+        case 2:
+            clear();
+            option_affichage(animal);
+            pause();
+            break;
+        case 3:
+            clear();
+            Modifier_un_animal(animal);
+            pause();
+            break;
+        case 4:
+            clear();
+            options_de_supprimer(animal);
+            pause();
+            break;
+        case 5:
+            clear();
+            options_Rechercher_un_animal(animal);
+            pause();
+            break;
+
+        case 0:
+            break;
+
+        default:
+            clear();
+            printf("choix invalide !\n");
+            pause();
+            break;
+        }
+
+        clear();
+    } while (choix != 0);
+}
 
 int main()
 {
     // menu_affichage_prancipale();
     Animal a[Nomnre_max_animaux];
     fichier_to_tableau_animaux(a);
-    // Options_Rechercher_un_animal(a);
     menu_affichage_prancipale(a);
 }
