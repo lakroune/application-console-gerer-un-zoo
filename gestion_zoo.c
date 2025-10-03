@@ -199,54 +199,70 @@ void options_ajouter_un_animal(Animal animal[])
         clear();
     } while (choix != 0);
 }
-Animal fichier_to_tableau_animaux(Animal animal[])
+int fichier_to_tableau_animaux(Animal animal[], char nom_fichier[])
 {
     FILE *fichier;
-    int max_id = 0;
     char ligne[200];
-    fichier = fopen("animaux.csv", "r");
+    fichier = fopen(nom_fichier, "r");
     if (fichier == NULL)
     {
-        printf("erreur d'ouverture fichier");
+        printf("erreur d'ouverture fichier\n");
+        return 0;
     }
 
     while (fgets(ligne, 200, fichier))
     {
         int mon_posion_dans_linge = 0;
+        animal[COUNT_ANIMAL].id = ID_ANIMAL_AUTO_INCREMENT;
         char *info_animal = strtok(ligne, ",");
         while (info_animal != NULL)
         {
             switch (mon_posion_dans_linge)
             {
+
             case 0:
-                animal[COUNT_ANIMAL].id = atoi(info_animal);
-                if (max_id < animal[COUNT_ANIMAL].id)
-                    max_id = animal[COUNT_ANIMAL].id;
-                break;
-            case 1:
                 strcpy(animal[COUNT_ANIMAL].nom, info_animal);
                 break;
-            case 2:
+            case 1:
                 strcpy(animal[COUNT_ANIMAL].espece, info_animal);
                 break;
-            case 3:
+            case 2:
                 animal[COUNT_ANIMAL].age = atoi(info_animal);
                 break;
-            case 4:
+            case 3:
                 strcpy(animal[COUNT_ANIMAL].habitat, info_animal);
                 break;
-            case 5:
+            case 4:
                 animal[COUNT_ANIMAL].poids = atof(info_animal);
                 break;
             default:
                 break;
             }
+
             mon_posion_dans_linge++;
             info_animal = strtok(NULL, ",");
         }
         COUNT_ANIMAL++;
+        ID_ANIMAL_AUTO_INCREMENT++;
     }
-    ID_ANIMAL_AUTO_INCREMENT = max_id + 1;
+
+    fclose(fichier);
+    return 1;
+}
+
+void fichier_to_tableau_animaux_binaire(Animal animal[])
+{
+    FILE *fichier;
+    fichier = fopen("animaux", "rb");
+    if (fichier == NULL)
+    {
+        printf("erreur d'ouverture fichier");
+    }
+    fread(&ID_ANIMAL_AUTO_INCREMENT, sizeof(int), 1, fichier);
+    while (fread(&animal[COUNT_ANIMAL], sizeof(Animal), 1, fichier))
+        COUNT_ANIMAL++;
+
+    fclose(fichier);
 }
 
 int habitat_existe(Animal animal[], char habitat[])
@@ -698,6 +714,111 @@ void Statistiques(Animal animal[])
     especes_les_plus_reprsentees(animal);
 }
 
+void sauvegarder_donnees_dans_fichier_binaire(Animal animal[])
+{
+    FILE *fichier;
+    fichier = fopen("animaux", "wb");
+    if (fichier == NULL)
+    {
+        printf("erreur d'ouverture fichier");
+    }
+    fwrite(&ID_ANIMAL_AUTO_INCREMENT, sizeof(int), 1, fichier);
+    for (int i = 0; i < COUNT_ANIMAL; i++)
+        fwrite(&animal[i], sizeof(Animal), 1, fichier);
+
+    fclose(fichier);
+}
+void option_quiter(Animal animal[])
+{
+    char choix = 'y';
+    do
+    {
+        choix = saisir_caracter("vieullez vous sauvegarder les donnees avant de quitter [y/n]: ");
+        switch (choix)
+        {
+        case 'y':
+            clear();
+            sauvegarder_donnees_dans_fichier_binaire(animal);
+            printf("les donnees sont sauvegardees avec succes !\n");
+            pause();
+            choix = 'n';
+            break;
+        case 'n':
+            break;
+        default:
+            clear();
+            printf("choix invalide !\n");
+            pause();
+            break;
+        }
+        clear();
+    } while (choix != 'n');
+}
+void exporter_donnees_dans_fichier_csv(Animal animal[])
+{
+    FILE *fichier;
+    char nomfichier[50];
+    strcpy(nomfichier, coverte_premier_caracter_en_majuscule(saisir_chaine_de_caractere("Nom du fichier :", 45)));
+    strcat(nomfichier, ".csv");
+    fichier = fopen(nomfichier, "w");
+    if (fichier == NULL)
+    {
+        printf("erreur d'ouverture fichier");
+    }
+    else
+        printf("les donnees sont exportees avec succes !\n");
+    for (int i = 0; i < COUNT_ANIMAL; i++)
+        fprintf(fichier, "%d,%s,%s,%d,%s,%.2f\n", animal[i].id, animal[i].nom, animal[i].espece, animal[i].age, animal[i].habitat, animal[i].poids);
+    fclose(fichier);
+}
+
+void importer_donnees_depuis_fichier_csv(Animal animal[])
+{
+    char nom_fichier[50];
+    strcpy(nom_fichier, coverte_premier_caracter_en_majuscule(saisir_chaine_de_caractere("Nom du fichier.csv :", 45)));
+    if (fichier_to_tableau_animaux(animal, nom_fichier) == 0)
+        printf("erreur d'importation !\n");
+    else
+        printf("les donnees sont importees avec succes !\n");
+}
+
+void options_importer_exporter(Animal animal[])
+{
+    int choix;
+    do
+    {
+        printf("============ Gestion ZOO ============\n");
+        printf("============ Options d'import/export=========\n");
+        printf("1. Importer les donnees depuis un fichier csv\n");
+        printf("2. Exporter les donnees vers un fichier csv\n");
+        printf("0. Retourner au menu principal\n");
+        choix = saisir_entier_positif("", "erreur de saisie [0-2]\n", 2);
+
+        switch (choix)
+        {
+        case 1:
+            clear();
+            importer_donnees_depuis_fichier_csv(animal);
+            choix = 0;
+            break;
+
+        case 2:
+            clear();
+            exporter_donnees_dans_fichier_csv(animal);
+            choix = 0;
+            break;
+        case 0:
+            break;
+
+        default:
+            clear();
+            printf("choix invalide !\n");
+            pause();
+            break;
+        }
+
+    } while (choix != 0);
+}
 
 void menu_affichage_principale(Animal animal[])
 {
@@ -714,8 +835,9 @@ void menu_affichage_principale(Animal animal[])
         printf("4. Supprimer un animal\n");
         printf("5. Rechercher un animal\n");
         printf("6. Statistiques\n");
+        printf("7. inporter/Exporter les donnees\n");
         printf("0. Quitter\n");
-        choix = saisir_entier_positif("", "\nerreur de saisie [0-6]\n", 6);
+        choix = saisir_entier_positif("", "\nerreur de saisie [0-7]\n", 7);
         getchar();
         switch (choix)
         {
@@ -745,8 +867,15 @@ void menu_affichage_principale(Animal animal[])
             Statistiques(animal);
             pause();
             break;
+        case 7:
+            clear();
+            options_importer_exporter(animal);
+            pause();
+            break;
 
         case 0:
+            option_quiter(animal);
+
             break;
 
         default:
@@ -755,7 +884,6 @@ void menu_affichage_principale(Animal animal[])
             pause();
             break;
         }
-
         clear();
     } while (choix != 0);
 }
@@ -763,7 +891,8 @@ void menu_affichage_principale(Animal animal[])
 int main()
 {
     Animal a[Nombre_max_animaux];
-    fichier_to_tableau_animaux(a);
+    // fichier_to_tableau_animaux(a);
+    fichier_to_tableau_animaux_binaire(a); // charger les donnees depuis le fichier binaire
 
     menu_affichage_principale(a);
     return 0;
