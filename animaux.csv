@@ -1,1 +1,22 @@
-Simba,Lion,5,Savane,190.5
+# Example content of animaux.csv
+# pour tester l'importation et l'exportation des données
+# importation et exportation des données
+# Format:
+nom,ecpece,age,habitat,poid
+sparky,Dog,5,Domestic,20.5
+whiskers,Cat,3,Domestic,10.2
+nemo,Fish,1,Aquarium,0.3
+tweety,Bird,2,Cage,0.5
+rocky,Dog,4,Domestic,25.0
+bella,Cat,2,Domestic,8.7
+goldie,Fish,2,Aquarium,0.4
+# voici la formation des champs:
+# nom: nom de l'animal (string)
+# ecpece: espece de l'animal (string)
+# age: age de l'animal (int)
+# habitat: habitat de l'animal (string)
+# poid: poid de l'animal (float)
+# doit etre separer par des virgules
+# aussi chaque animal doit etre dans une ligne different
+# chaque champs doitetre dans le meme ordre que la formation des champs (nom,ecpece,age,habitat,poid)    
+# fin du fichier --- IGNORE ---
