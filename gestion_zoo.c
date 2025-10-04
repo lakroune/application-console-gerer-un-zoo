@@ -1013,7 +1013,7 @@ void menu_affichage_principale(Animal animal[])
         printf("4. Supprimer un animal\n");
         printf("5. Rechercher un animal\n");
         printf("6. Statistiques\n");
-        printf("7. inporter/Exporter les donnees\n");
+        printf("7. Importer/Exporter les donnees\n");
         printf("8. A propos du programme\n");
         printf("0. Quitter\n");
         choix = saisir_entier_positif("choix :", "\nerreur de saisie [0-8]\n", 8);
